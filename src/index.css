@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+
+@font-face {
+  font-family: 'Amiri';
+  src: url('https://fonts.googleapis.com/css2?family=Amiri&display=swap');
+}
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tambahin font biar makin kece (Optional tapi saran gua pasang) */
+@theme {
+  --font-serif: "Lora", serif;
+  --font-arabic: "Amiri", serif;
+}
+
+/* Transisi warna biar smooth kayak aplikasi mahal */
+@layer base {
+  *, ::before, ::after {
+    @apply transition-colors duration-300;
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+.dark .animate-shimmer::after {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+}
+
+.dark body {
+  background-color: #0f172a; /* Warna Slate 900 */
+  color: white;
+}
