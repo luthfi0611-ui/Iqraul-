@@ -2,21 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Bars3BottomLeftIcon, 
-  MusicalNoteIcon, 
   SunIcon, 
   MoonIcon, 
   MagnifyingGlassIcon,
-  XMarkIcon,
   SparklesIcon,
   HeartIcon,
   HomeIcon,
   FireIcon,
-  BookOpenIcon,
   ClockIcon,
   Squares2X2Icon,
   BookmarkIcon,
   UserCircleIcon,
-  SpeakerWaveIcon // Icon tambahan buat Nada
+  SpeakerWaveIcon 
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
 
@@ -32,10 +29,17 @@ const Home = () => {
   const [surahs, setSurahs] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   
-  const [favorites, setFavorites] = useState(JSON.parse(localStorage.getItem('fav_surah')) || []);
-  const [lastRead, setLastRead] = useState(JSON.parse(localStorage.getItem('last_read')) || null);
+  const [favorites, setFavorites] = useState(() => {
+    const saved = localStorage.getItem('fav_surah');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  const [lastRead, setLastRead] = useState(() => {
+    const saved = localStorage.getItem('last_read');
+    return saved ? JSON.parse(saved) : null;
+  });
 
-  // --- TAMBAHAN FITUR QORI & NADA ---
+  // --- FITUR QORI & NADA ---
   const [selectedQori, setSelectedQori] = useState(localStorage.getItem('selected_qori') || '01');
   const [selectedNada, setSelectedNada] = useState(localStorage.getItem('selected_nada') || 'murattal');
   
@@ -49,7 +53,7 @@ const Home = () => {
 
   const listNada = [
     { id: 'murattal', name: 'Murattal (Flat)', desc: 'Tempo Sedang' },
-    { id: 'mujawwad', name: 'Mujawwad (Nada)', desc: 'Irama' },
+    { id: 'mujawwad', name: 'Mujawwad (Nada)', desc: 'Irama Berlagu' },
   ];
 
   const handleQoriChange = (id) => {
@@ -104,6 +108,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#070b0f] transition-colors duration-500 pb-32">
       
+      {/* HEADER */}
       <header className={`fixed top-0 inset-x-0 z-[100] transition-all duration-300 ${isScrolled ? 'py-4 bg-white/90 dark:bg-[#070b0f]/90 backdrop-blur-xl shadow-lg' : 'py-8 bg-transparent'}`}>
         <div className="container mx-auto px-6 flex justify-between items-center max-w-7xl">
           <button onClick={() => setIsSidebarOpen(true)} className="p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-md border dark:border-white/5 transition-transform active:scale-90">
@@ -175,9 +180,8 @@ const Home = () => {
           </div>
         </section>
 
-        {/* --- SETTINGS: QORI & NADA --- */}
+        {/* SETTINGS: QORI & NADA */}
         <section className="max-w-4xl mx-auto mb-12 space-y-8">
-          {/* Pilih Qori */}
           <div>
             <div className="flex items-center gap-3 mb-4 px-2">
               <UserCircleIcon className="w-5 h-5 text-emerald-500" />
@@ -191,7 +195,7 @@ const Home = () => {
                   className={`px-6 py-3 rounded-2xl text-xs font-bold transition-all whitespace-nowrap border shadow-sm ${
                     selectedQori === qori.id 
                     ? 'bg-emerald-600 text-white border-emerald-600 shadow-emerald-600/20' 
-                    : 'bg-white dark:bg-slate-900 text-slate-400 border-transparent dark:border-white/5 hover:border-emerald-500/30'
+                    : 'bg-white dark:bg-slate-900 text-slate-400 border-transparent dark:border-white/5'
                   }`}
                 >
                   {qori.name}
@@ -200,7 +204,6 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Pilih Nada (Gaya Bacaan) */}
           <div>
             <div className="flex items-center gap-3 mb-4 px-2">
               <SpeakerWaveIcon className="w-5 h-5 text-blue-500" />
@@ -274,8 +277,6 @@ const Home = () => {
                   {surah.nama}
                 </span>
               </div>
-              
-              <div className="absolute -inset-10 bg-emerald-500/5 opacity-0 group-hover:opacity-100 blur-3xl transition-opacity pointer-events-none" />
             </Link>
           ))}
         </section>
@@ -288,12 +289,26 @@ const Home = () => {
         <button className="p-4 text-slate-400"><HeartIcon className="w-7 h-7"/></button>
       </nav>
 
+      {/* GLOBAL STYLES (DIPERBAIKI) */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&family=Amiri:wght@700&display=swap');
+        
+        /* Hilangkan Scrollbar Global */
+        html, body {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        body::-webkit-scrollbar {
+          display: none;
+        }
+
+        /* Hilangkan Scrollbar Element Tertentu */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
         body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         .font-arabic { font-family: 'Amiri', serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .dark body { background-color: #070b0f; }
+
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
