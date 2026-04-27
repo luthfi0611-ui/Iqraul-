@@ -14,7 +14,9 @@ import {
   BookOpenIcon,
   ClockIcon,
   Squares2X2Icon,
-  BookmarkIcon
+  BookmarkIcon,
+  UserCircleIcon,
+  SpeakerWaveIcon // Icon tambahan buat Nada
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
 
@@ -30,11 +32,37 @@ const Home = () => {
   const [surahs, setSurahs] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Fitur Inti: Favorit & Terakhir Baca
   const [favorites, setFavorites] = useState(JSON.parse(localStorage.getItem('fav_surah')) || []);
   const [lastRead, setLastRead] = useState(JSON.parse(localStorage.getItem('last_read')) || null);
 
-  // --- 2. DARK MODE SYNC (BIAR DETAIL.JSX NYAMBUNG) ---
+  // --- TAMBAHAN FITUR QORI & NADA ---
+  const [selectedQori, setSelectedQori] = useState(localStorage.getItem('selected_qori') || '01');
+  const [selectedNada, setSelectedNada] = useState(localStorage.getItem('selected_nada') || 'murattal');
+  
+  const listQori = [
+    { id: '01', name: 'Al-Juhany' },
+    { id: '02', name: 'Al-Qasim' },
+    { id: '03', name: 'As-Sudais' },
+    { id: '04', name: 'Al-Dossari' },
+    { id: '05', name: 'Al-Afasy' },
+  ];
+
+  const listNada = [
+    { id: 'murattal', name: 'Murattal (Flat)', desc: 'Tempo Sedang' },
+    { id: 'mujawwad', name: 'Mujawwad (Nada)', desc: 'Irama' },
+  ];
+
+  const handleQoriChange = (id) => {
+    setSelectedQori(id);
+    localStorage.setItem('selected_qori', id);
+  };
+
+  const handleNadaChange = (id) => {
+    setSelectedNada(id);
+    localStorage.setItem('selected_nada', id);
+  };
+
+  // --- 2. DARK MODE SYNC ---
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -59,7 +87,7 @@ const Home = () => {
 
   // --- 4. HANDLERS ---
   const toggleFavorite = (e, id) => {
-    e.preventDefault(); // Biar gak ke-trigger navigasi Link
+    e.preventDefault();
     const updated = favorites.includes(id) 
       ? favorites.filter(f => f !== id) 
       : [...favorites, id];
@@ -76,7 +104,6 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#070b0f] transition-colors duration-500 pb-32">
       
-      {/* HEADER - RESPONSIVE */}
       <header className={`fixed top-0 inset-x-0 z-[100] transition-all duration-300 ${isScrolled ? 'py-4 bg-white/90 dark:bg-[#070b0f]/90 backdrop-blur-xl shadow-lg' : 'py-8 bg-transparent'}`}>
         <div className="container mx-auto px-6 flex justify-between items-center max-w-7xl">
           <button onClick={() => setIsSidebarOpen(true)} className="p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-md border dark:border-white/5 transition-transform active:scale-90">
@@ -91,10 +118,8 @@ const Home = () => {
 
       <main className="container mx-auto px-6 pt-32 md:pt-44 max-w-7xl">
         
-        {/* DASHBOARD HERO - RESPONSIVE */}
+        {/* HERO SECTION */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-12">
-          
-          {/* Main Card (Terakhir Baca) */}
           <div className="lg:col-span-8 bg-emerald-950 rounded-[2.5rem] p-8 md:p-14 text-white relative overflow-hidden shadow-2xl">
             <div className="relative z-10 h-full flex flex-col justify-between">
               <div>
@@ -105,14 +130,10 @@ const Home = () => {
                 <h2 className="text-6xl md:text-8xl font-black mb-10 tracking-tighter leading-none">Iqra<span className="text-emerald-500">.</span></h2>
               </div>
 
-              {/* Tampilan Last Read yang Beneran Fungsi */}
               <div className="mt-4">
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 mb-4">Lanjutkan Bacaan</p>
                 {lastRead ? (
-                  <Link 
-                    to={`/surat/${lastRead.nomor}`} 
-                    className="inline-flex items-center gap-5 bg-white/10 hover:bg-white/20 p-5 rounded-[2rem] transition-all border border-white/10 group backdrop-blur-sm"
-                  >
+                  <Link to={`/surat/${lastRead.nomor}`} className="inline-flex items-center gap-5 bg-white/10 hover:bg-white/20 p-5 rounded-[2rem] transition-all border border-white/10 group backdrop-blur-sm">
                     <div className="bg-emerald-500 p-3 rounded-xl group-hover:rotate-12 transition-transform">
                       <BookmarkIcon className="w-6 h-6 text-white" />
                     </div>
@@ -122,7 +143,7 @@ const Home = () => {
                     </div>
                   </Link>
                 ) : (
-                  <div className="text-sm opacity-40 italic flex items-center gap-2">
+                  <div className="text-sm opacity-40 italic flex items-center gap-2 text-white">
                     <ClockIcon className="w-5 h-5" /> Belum ada riwayat bacaan.
                   </div>
                 )}
@@ -131,7 +152,6 @@ const Home = () => {
             <div className="absolute -right-10 -bottom-10 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px]" />
           </div>
 
-          {/* Quick Stats (Favorit & Streak) */}
           <div className="lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
              <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] shadow-sm border dark:border-white/5 flex items-center gap-6">
                 <div className="p-4 bg-orange-100 dark:bg-orange-500/10 rounded-2xl">
@@ -155,6 +175,56 @@ const Home = () => {
           </div>
         </section>
 
+        {/* --- SETTINGS: QORI & NADA --- */}
+        <section className="max-w-4xl mx-auto mb-12 space-y-8">
+          {/* Pilih Qori */}
+          <div>
+            <div className="flex items-center gap-3 mb-4 px-2">
+              <UserCircleIcon className="w-5 h-5 text-emerald-500" />
+              <span className="text-[10px] font-black uppercase tracking-widest dark:text-slate-400">Pilih Imam / Qori</span>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+              {listQori.map((qori) => (
+                <button
+                  key={qori.id}
+                  onClick={() => handleQoriChange(qori.id)}
+                  className={`px-6 py-3 rounded-2xl text-xs font-bold transition-all whitespace-nowrap border shadow-sm ${
+                    selectedQori === qori.id 
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-emerald-600/20' 
+                    : 'bg-white dark:bg-slate-900 text-slate-400 border-transparent dark:border-white/5 hover:border-emerald-500/30'
+                  }`}
+                >
+                  {qori.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Pilih Nada (Gaya Bacaan) */}
+          <div>
+            <div className="flex items-center gap-3 mb-4 px-2">
+              <SpeakerWaveIcon className="w-5 h-5 text-blue-500" />
+              <span className="text-[10px] font-black uppercase tracking-widest dark:text-slate-400">Gaya Nada Bacaan</span>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {listNada.map((nada) => (
+                <button
+                  key={nada.id}
+                  onClick={() => handleNadaChange(nada.id)}
+                  className={`p-4 rounded-[2rem] text-left transition-all border shadow-sm ${
+                    selectedNada === nada.id 
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-blue-600/20' 
+                    : 'bg-white dark:bg-slate-900 text-slate-400 border-transparent dark:border-white/5'
+                  }`}
+                >
+                  <p className="font-black text-sm">{nada.name}</p>
+                  <p className={`text-[10px] opacity-60 font-bold ${selectedNada === nada.id ? 'text-white' : 'text-slate-400'}`}>{nada.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* SEARCH BAR */}
         <div className="relative mb-16 max-w-4xl mx-auto">
           <MagnifyingGlassIcon className="absolute left-8 top-1/2 -translate-y-1/2 w-7 h-7 text-slate-300" />
@@ -166,7 +236,7 @@ const Home = () => {
           />
         </div>
 
-        {/* LIST SURAH - RESPONSIVE GRID */}
+        {/* LIST SURAH */}
         <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {surahs
             .filter(s => s.namaLatin.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -211,37 +281,23 @@ const Home = () => {
         </section>
       </main>
 
-      {/* MOBILE BOTTOM NAV - RESPONSIVE */}
+      {/* MOBILE BOTTOM NAV */}
       <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl p-5 rounded-[2.5rem] flex justify-around shadow-[0_20px_50px_rgba(0,0,0,0.2)] border dark:border-white/10 md:hidden z-[1000]">
         <button className="p-4 bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-500/30"><HomeIcon className="w-7 h-7"/></button>
         <button className="p-4 text-slate-400" onClick={() => setIsSidebarOpen(true)}><Squares2X2Icon className="w-7 h-7"/></button>
         <button className="p-4 text-slate-400"><HeartIcon className="w-7 h-7"/></button>
       </nav>
 
-      {/* GLOBAL STYLES */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&family=Amiri:wght@700&display=swap');
-        
-        body { 
-          font-family: 'Plus Jakarta Sans', sans-serif; 
-          -webkit-tap-highlight-color: transparent;
-        }
-        
-        .font-arabic { 
-          font-family: 'Amiri', serif; 
-        }
-
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .font-arabic { font-family: 'Amiri', serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        .dark body { 
-          background-color: #070b0f; 
-        }
-
+        .dark body { background-color: #070b0f; }
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        
         main { animation: fadeIn 0.8s ease-out; }
       `}</style>
     </div>
